@@ -1,0 +1,2462 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "form",
+	"description": "4D form",
+	"definitions": {
+		"types": {
+			"color": {
+				"type": "string",
+				"$comment": "a css color, or 'transparent' or 'automatic' or 'automaticAlternate'"
+			},
+			"picture": {
+				"type": "string",
+				"$comment": "sandboxed absolute or relative path"
+			},
+			"dateFormat": {
+				"type": "string",
+				"pattern": "^(systemShort|systemMedium|systemLong|iso8601|rfc822|short|shortCentury|abbreviated|long)( blankIfNull)?$"
+			},
+			"timeFormat": {
+				"type": "string",
+				"pattern": "^(hh_mm_ss|hh_mm|hh_mm_am|mm_ss|HH_MM_SS|HH_MM|MM_SS|systemShort|systemMedium|systemLong|iso8601)( blankIfNull)?$"
+			},
+			"treeItems": {
+				"type": "array",
+				"items": {
+					"oneOf": [{
+						"type":"string"
+					},{
+						"type":"number"
+					},{
+						"type": "object",
+						"properties": {
+							"text": {
+								"type": "string"
+							},
+							"ref": {
+								"type": "number"
+							},
+							"editable": {
+								"type": "boolean"
+							},
+							"collapsed": {
+								"type": "boolean"
+							},
+							"action": {
+								"type": "string"
+							},
+							"textDecoration": {
+								"enum": ["none", "underline"]
+							},
+							"fontWeight": {
+								"enum": ["normal", "bold"]
+							},
+							"fontStyle": {
+								"enum": ["normal", "italic"]
+							},
+							"stroke": {
+								"$ref": "#/definitions/types/color"
+							},
+							"icon": {
+								"$ref": "#/definitions/types/picture"
+							},
+							"subTree": {
+								"$ref": "#/definitions/types/tree"
+							}
+						}
+					}]
+				}
+			},
+			"tree": {
+				"type": "object",
+				"properties": {
+					"lineHeight": {
+						"type": "number"
+					},
+					"editable": {
+						"type": "boolean"
+					},
+					"customDataInteger": {
+						"type": "number"
+					},
+					"items": {
+						"$ref": "#/definitions/types/treeItems"
+					}
+				}
+			},
+			"list": {
+				"oneOf": [{
+					"$ref": "#/definitions/types/treeItems"
+				},{
+					"$ref": "#/definitions/types/tree"
+				}]
+			},
+			"height": {
+				"type": "string",
+				"pattern": "^(\\d+)(px|em)?$"
+			},
+			"windowSize": {
+				"properties": {
+					"windowSizingX": {
+						"enum": ["fixed", "variable"]
+					},
+					"windowSizingY": {
+						"enum": ["fixed", "variable"]
+					},
+					"windowMinWidth": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"windowMinHeight": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"windowMaxWidth": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"windowMaxHeight": {
+						"type": "integer",
+						"minimum": 0
+					}
+				}
+			},
+			"formSize": {
+				"properties": {
+					"formSizeAnchor": {
+						"type": "string"
+					},
+					"rightMargin": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"bottomMargin": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"width": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"height": {
+						"type": "integer",
+						"minimum": 0
+					}
+				}
+			},
+			"markers": {
+				"properties": {
+					"markerBody": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"markerFooter": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"markerHeader": {
+						"anyOf": [{
+							"type": "integer",
+							"minimum": 0
+						}, {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"minimum": 0
+							}
+						}]
+					},
+					"markerBreak": {
+						"anyOf": [{
+							"type": "integer",
+							"minimum": 0
+						}, {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"minimum": 0
+							}
+						}]
+					}
+				}
+			},
+			"css": {
+				"oneOf": [{
+					"type": "string"
+				},{
+					"type": "object",
+					"properties": {
+						"path": {
+							"type": "string"
+						},
+						"media": {
+							"enum": ["mac", "windows"]
+						}
+					}
+				}]
+			},
+			"objectCommon": {
+				"properties": {
+					"class": {
+						"type": "string"
+					},
+					"visibility": {
+						"enum": ["visible", "hidden", "selectedRows", "unselectedRows"]
+					},
+					"top": {
+						"type": "integer"
+					},
+					"bottom": {
+						"type": "integer"
+					},
+					"left": {
+						"type": "integer"
+					},
+					"right": {
+						"type": "integer"
+					},
+					"width": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"height": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"sizingX": {
+						"enum": ["move", "grow", "fixed"]
+					},
+					"sizingY": {
+						"enum": ["move", "grow", "fixed"]
+					}
+				},
+				"required": ["top", "left"]
+			},
+			"events": {
+				"properties": {
+					"events": {
+						"type": "array",
+						"items": {
+							"anyOf": [{
+                "enum": [ "onLoad", "onUnload", "onValidate", "onClick", "onAlternateClick", "onLongClick", "onDoubleClick", "onAfterKeystroke", "onBeforeKeystroke", "onBeforeDataEntry", "onAfterEdit", "onDataChange", "onGettingFocus", "onLosingFocus", "onActivate", "onDeactivate", "onOutsideCall", "onDrop", "onDragOver", "onBeginDragOver", "onMenuSelect", "onPluginArea", "onHeader", "onPrintingDetail", "onPrintingBreak", "onPrintingFooter", "onCloseBox", "onDisplayDetail", "onOpenDetail", "onCloseDetail", "onResize", "onAfterSort", "onSelectionChange", "onColumnResize", "onColumnMove", "onRowMove", "onMouseEnter", "onMouseMove", "onMouseLeave", "onMouseUp", "onLoadRecord", "onHeaderClick", "onFooterClick", "onExpand", "onCollapse", "onBeginURLLoading", "onURLResourceLoading", "onEndURLLoading", "onURLLoadingError", "onURLFiltering", "onOpenExternalLink", "onWindowOpeningDenied", "onBoundVariableChange", "onPageChange", "onDeleteAction", "onScroll", "onTimer", "onVPReady", "onRowResize", "onVPRangeChanged" ]
+							}, {
+								"type": "integer"
+							}]
+						}
+					}
+				}
+			},
+			"borderStyle": {
+				"properties": {
+					"borderStyle": {
+						"enum": ["system", "none", "solid", "dotted", "raised", "sunken", "double"]
+					}
+				}
+			},
+			"drawingSpec": {
+				"properties": {
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"fill": {
+						"$ref": "#/definitions/types/color"
+					}
+				}
+			},
+			"dashArray": {
+				"anyOf": [{
+					"type": "string"
+				}, {
+					"type": "array",
+					"items": {
+						"type": "integer"
+					}
+				}]
+			},
+			"table": {
+				"anyOf": [{
+					"type": "string",
+					"$comment": "table name"
+				}, {
+					"type": "integer",
+					"minimum": 0,
+					"$comment": "table number"
+				}]
+			},
+			"fontSpec": {
+				"properties": {
+					"textDecoration": {
+						"enum": ["none", "underline"]
+					},
+					"fontWeight": {
+						"enum": ["normal", "bold"]
+					},
+					"fontStyle": {
+						"enum": ["normal", "italic"]
+					},
+					"fontSize": {
+						"type": "integer",
+						"minimum": 0,
+						"$comment": "Font size to apply to fontFamily or fontTheme property. (0 means automatic if a fontTheme is specified)"
+					},
+					"fontFamily": {
+						"type": "string",
+						"$comment": "If both a fontTheme and a fontFamily are specified, fontFamily has priority"
+					}
+				}
+			},
+			"shortcut": {
+				"properties": {
+					"shortcutKey": {
+						"anyOf": [{
+							"type": "string",
+							"$comment": "shortcut character"
+						},{
+							"enum": ["[F1]","[F2]","[F3]","[F4]","[F5]","[F6]","[F7]","[F8]","[F9]","[F10]","[F11]","[F12]","[F13]","[F14]","[F15]","[Return]","[Enter]","[Backspace]","[Tab]","[Esc]","[Del]","[Home]","[End]","[Help]","[Page up]","[Page down]","[Left arrow]","[Right arrow]","[Up arrow]","[Down arrow]"]
+						}]
+					},
+					"shortcutAccel": {
+						"type": "boolean",
+						"$comment": "command on mac, control on win"
+					},
+					"shortcutControl": {
+						"type": "boolean",
+						"$comment": "overriden by shortcutAccel on windows"
+					},
+					"shortcutCommand": {
+						"type": "boolean",
+						"$comment": "macOS only. overriden by shortcutAccel on mac"
+					},
+					"shortcutShift": {
+						"type": "boolean"
+					},
+					"shortcutAlt": {
+						"type": "boolean"
+					}
+				}
+			},
+			"pageFormat": {
+				"properties": {
+					"paperName": {
+						"type": "string"
+					},
+					"paperWidth": {
+						"type": "string",
+						"$comment": "used when a paper named paperName was not found. Requires unit suffix: pt, in, mm, cm."
+					},
+					"paperHeight": {
+						"type": "string",
+						"$comment": "used when a paper named paperName was not found. Requires unit suffix: pt, in, mm, cm."
+					},
+					"orientation": {
+						"enum": ["portrait","landscape"]
+					},
+					"scale": {
+						"type": "number",
+						"minimum": 0,
+						"$comment": "page scaling percentage (100 means no scaling)"
+					}
+				}
+			}
+		},
+		"text": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "text" ]
+					},
+					"text": {
+						"type": "string"
+					},
+					"fontTheme": {
+						"enum": [ "normal", "main", "additional" ]
+					},
+					"textAlign": {
+						"enum": [ "automatic", "right", "center", "justify", "left" ]
+					},
+					"textAngle": {
+						"enum": [ 0, 90, 180, 270 ]
+					},
+					"borderRadius": {
+						"type": "integer",
+						"minimum": 0
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/drawingSpec",
+				"$comment": "Background and line color"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"line": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["line"]
+					},
+					"startPoint": {
+						"enum": ["topLeft", "bottomLeft"]
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"strokeWidth": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"strokeDashArray": {
+						"$ref": "#/definitions/types/dashArray"
+					}
+				}
+			},
+			{
+				"$ref": "#/definitions/types/objectCommon"
+			}
+			]
+		},
+		"rectangle": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["rectangle"]
+					},
+					"borderRadius": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"strokeWidth": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"strokeDashArray": {
+						"$ref": "#/definitions/types/dashArray"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/drawingSpec"
+			}]
+		},
+		"oval": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["oval"]
+					},
+					"strokeWidth": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"strokeDashArray": {
+						"$ref": "#/definitions/types/dashArray"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/drawingSpec"
+			}]
+		},
+		"groupBox": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["groupBox"]
+					},
+					"text": {
+						"type": "string"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"textAlign": {
+						"enum": ["automatic", "right", "center", "left"]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"tab": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["tab"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer","arrayText","object"]
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment":"When memorizeGeometry is activated for the current form, memorizeValue save the value of the current object. "
+
+					},
+					"labels": {
+						"$ref": "#/definitions/types/list"
+					},
+					"action": {
+						"type": "string"
+					},
+					"labelsPlacement": {
+						"enum": ["top", "bottom"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"picture": {
+			"allOf": [{
+        "properties": {
+          "type": {
+            "enum": [ "picture" ]
+          },
+          "pictureFormat": {
+            "enum": [ "scaled", "truncatedTopLeft", "truncatedCenter", "tiled" ]
+          },
+          "picture": {
+            "$ref": "#/definitions/types/picture"
+          }
+        }
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}]
+		},
+		"input": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "input" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "text", "object", "number", "integer", "boolean", "picture", "date", "time" ]
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment": "When memorizeGeometry is activated for the current form, memorizeValue save the dataSource value. "
+					},
+					"fontTheme": {
+						"enum": [ "normal", "main", "additional" ]
+					},
+					"textAlign": {
+						"enum": [ "automatic", "right", "center", "justify", "left" ]
+					},
+					"textAngle": {
+						"enum": [ 0, 90, 180, 270 ]
+					},
+					"placeholder": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"hideFocusRing": {
+						"type": "boolean"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"showSelection": {
+						"type": "boolean"
+					},
+					"spellcheck": {
+						"type": "boolean"
+					},
+					"contextMenu": {
+						"enum": [ "automatic", "none" ]
+					},
+					"scrollbarHorizontal": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"scrollbarVertical": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"textFormat": {
+						"type": "string"
+					},
+					"numberFormat": {
+						"type": "string"
+					},
+					"pictureFormat": {
+						"enum": [ "scaled", "truncatedTopLeft", "truncatedCenter", "tiled", "proportionalTopLeft", "proportionalCenter" ]
+					},
+					"dateFormat": {
+						"$ref": "#/definitions/types/dateFormat"
+					},
+					"timeFormat": {
+						"$ref": "#/definitions/types/timeFormat"
+					},
+					"booleanFormat": {
+						"type": "string",
+						"$comment": "textWhenTrue;textWhenFalse"
+					},
+					"entryFilter": {
+						"type": "string"
+					},
+					"choiceList": {
+						"$ref": "#/definitions/types/list"
+					},
+					"requiredList": {
+						"$ref": "#/definitions/types/list"
+					},
+					"excludedList": {
+						"$ref": "#/definitions/types/list"
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"min": {
+						"type": [ "string", "number" ],
+						"$comment": "Property used for number, date and time"
+					},
+					"max": {
+						"type": [ "string", "number" ],
+						"$comment": "Property used for number, date and time"
+					},
+					"defaultValue": {
+						"type": "string"
+					},
+					"styledText": {
+						"type": "boolean"
+					},
+					"storeDefaultStyle": {
+						"type": "boolean"
+					},
+					"multiline": {
+						"enum": [ "automatic", "yes", "no" ]
+					},
+					"wordwrap": {
+						"enum": [ "automatic", "normal", "none" ],
+						"$comment": "Only applicable if multiline is activated"
+					},
+					"allowFontColorPicker": {
+						"type": "boolean"
+					},
+					"printFrame": {
+						"enum": [ "fixed", "variable" ]
+					},
+					"keyboardDialect": {
+						"type": "string"
+					},
+					"dragging": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"dropping": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"borderRadius": {
+						"type": "integer",
+						"minimum": 0
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/drawingSpec"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"button": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "button" ]
+					},
+					"style": {
+						"enum": [ "regular", "toolbar", "bevel", "roundedBevel", "gradientBevel", "texturedBevel", "office", "help", "circular", "custom", "flat" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"text": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"defaultButton": {
+						"type": "boolean"
+					},
+					"method": {
+						"type": "string",
+						"$comment": "don't forget to configure 'events' property accordingly"
+					},
+					"action": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"display": {
+						"type": "boolean",
+						"$comment": "When display is false, the object is not visible but still active"
+					},
+					"textPlacement": {
+						"enum": [ "left", "right", "top", "bottom", "center" ],
+						"$comment": "Placement of text relative to icon if any"
+					},
+					"icon": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"iconFrames": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"customBackgroundPicture": {
+						"$ref": "#/definitions/types/picture",
+						"$comment": "Only for custom type buttons"
+
+					},
+					"customBorderX": {
+						"type": "integer",
+						"$comment": "Only for custom type buttons"
+					},
+					"customBorderY": {
+						"type": "integer",
+						"$comment": "Only for custom type buttons"
+
+					},
+					"customOffset": {
+						"type": "integer",
+						"$comment": "Only for custom type buttons"
+					},
+					"popupPlacement": {
+						"enum": [ "none", "linked", "separated" ]
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"dropping": {
+						"enum": [ "none", "custom" ]
+					},
+					"imageHugsTitle": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"textAlign": {
+						"enum": [ "left", "center", "right" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}, {
+				"$ref": "#/definitions/types/shortcut"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"checkbox": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "checkbox" ]
+					},
+					"style": {
+						"enum": [ "regular", "toolbar", "bevel", "roundedBevel", "gradientBevel", "texturedBevel", "office", "custom", "disclosure", "roundedDisclosure", "flat" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "integer", "boolean" ],
+						"$comment": "The datasource type is used only to type the automatic variable when no datasource is specified"
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment": "When memorizeGeometry is activated for the current form, memorizeValue save the dataSource value. "
+					},
+					"text": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"method": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string"
+					},
+					"threeState": {
+						"type": "boolean"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"textPlacement": {
+						"enum": [ "left", "right", "top", "bottom", "center" ],
+						"$comment": "placement of text relative to icon if any"
+					},
+					"icon": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"iconFrames": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"customBackgroundPicture": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"customBorderX": {
+						"type": "integer"
+					},
+					"customBorderY": {
+						"type": "integer"
+					},
+					"customOffset": {
+						"type": "integer"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"imageHugsTitle": {
+						"type": "boolean"
+					},
+					"textAlign": {
+						"enum": [ "left", "center", "right" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}, {
+				"$ref": "#/definitions/types/shortcut"
+			}]
+		},
+		"radio": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "radio" ]
+					},
+					"style": {
+						"enum": [ "regular", "toolbar", "bevel", "roundedBevel", "gradientBevel", "texturedBevel", "office", "custom", "disclosure", "roundedDisclosure", "flat" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "integer", "boolean" ],
+						"$comment": "The datasource type is used only to type the automatic variable when no datasource is specified"
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment": "When memorizeGeometry is activated for the current form, memorizeValue save the dataSource value. "
+					},
+					"text": {
+						"type": "string"
+					},
+					"radioGroup": {
+						"type": "string",
+						"$comment": "Radio group name. Objects with same radioGroup property form a radio group"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"textPlacement": {
+						"enum": [ "left", "right", "top", "bottom", "center" ],
+						"$comment": "placement of text relative to icon if any"
+					},
+					"icon": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"iconFrames": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"customBackgroundPicture": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"customBorderX": {
+						"type": "integer"
+					},
+					"customBorderY": {
+						"type": "integer"
+					},
+					"customOffset": {
+						"type": "integer"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"imageHugsTitle": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"textAlign": {
+						"enum": [ "left", "center", "right" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}, {
+				"$ref": "#/definitions/types/shortcut"
+			}]
+		},
+		"dropdown": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "dropdown" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "arrayText", "arrayNumber", "arrayDate", "arrayTime", "integer", "object", "text" ],
+						"$comment": "Type of bound variable when dataSource is not specified. Use 'integer' to bind a hierarchical list"
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment": "When memorizeGeometry is activated for the current form, memorizeValue save the dataSource value. "
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"method": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"textFormat": {
+						"type": "string"
+					},
+					"numberFormat": {
+						"type": "string"
+					},
+					"dateFormat": {
+						"$ref": "#/definitions/types/dateFormat"
+					},
+					"timeFormat": {
+						"$ref": "#/definitions/types/timeFormat"
+					},
+					"display": {
+						"type": "boolean",
+						"$comment": "When display is false, the object is not visible but still active"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"choiceList": {
+						"$ref": "#/definitions/types/list",
+						"$comment": "When a choiceList is provided, the dropdown should be bound to an arrayText, or an integer if the list is hierarchical"
+					},
+					"saveAs": {
+						"enum": [ "value", "reference" ],
+						"$comment": "When bound to a hierarchical list, use list item value or reference"
+					},
+					"textAlign": {
+						"enum": [ "automatic", "right", "center", "justify", "left" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"combo": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "combo" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "text", "arrayText", "arrayNumber", "arrayDate", "arrayTime", "object" ]
+					},
+					"placeholder": {
+						"type": "string"
+					},
+					"textFormat": {
+						"type": "string"
+					},
+					"numberFormat": {
+						"type": "string"
+					},
+					"dateFormat": {
+						"$ref": "#/definitions/types/dateFormat"
+					},
+					"timeFormat": {
+						"$ref": "#/definitions/types/timeFormat"
+					},
+					"entryFilter": {
+						"type": "string"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"choiceList": {
+						"$ref": "#/definitions/types/list"
+					},
+					"automaticInsertion": {
+						"type": "boolean"
+					},
+					"excludedList": {
+						"$ref": "#/definitions/types/list"
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"dragging": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"dropping": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"textAlign": {
+						"enum": [ "automatic", "right", "center", "justify", "left" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"webArea": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["webArea"]
+					},
+					"dataSource": {
+						"type": "string",
+						"$comment": "Currently, the only purpose of the datasource is to reference the widget when using WA commands."
+					},
+					"progressSource": {
+						"type": "string"
+					},
+					"urlSource": {
+						"type": "string"
+					},
+					"contextMenu": {
+						"enum": ["automatic", "none"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"webEngine": {
+						"enum": ["embedded", "system"]
+					},
+					"methodsAccessibility": {
+						"enum": ["all", "none"]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"view": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["view"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"userInterface": {
+						"enum": [ "none", "toolbar", "ribbon" ]
+					},
+					"withFormulaBar": {
+						"type": "boolean"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"write": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "write" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"hideFocusRing": {
+						"type": "boolean"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"showSelection": {
+						"type": "boolean"
+					},
+					"spellcheck": {
+						"type": "boolean"
+					},
+					"contextMenu": {
+						"enum": [ "automatic", "none" ]
+					},
+					"scrollbarHorizontal": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"scrollbarVertical": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"method": {
+						"type": "string"
+					},
+					"keyboardDialect": {
+						"type": "string",
+						"$comment": "Using language identifier RFC 3066 Bis"
+					},
+					"printFrame": {
+						"enum": [ "variable", "fixed" ]
+					},
+					"dragging": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"dropping": {
+						"enum": [ "none", "automatic", "custom" ]
+					},
+					"dpi": {
+						"enum": [ 0, 72, 96 ],
+						"$comment": "0 for automatic"
+					},
+					"zoom": {
+						"enum": [ 25, 50, 75, 100, 125, 150, 175, 200, 300, 400 ]
+					},
+					"layoutMode": {
+						"enum": [ "embedded", "draft", "page" ]
+					},
+					"showHTMLWysiwyg": {
+						"type": "boolean"
+					},
+					"showHiddenChars": {
+						"type": "boolean"
+					},
+					"showPageFrames": {
+						"type": "boolean"
+					},
+					"showHeaders": {
+						"type": "boolean"
+					},
+					"showFooters": {
+						"type": "boolean"
+					},
+					"showBackground": {
+						"type": "boolean"
+					},
+					"showReferences": {
+						"type": "boolean"
+					},
+					"showHorizontalRuler": {
+						"type": "boolean"
+					},
+					"showVerticalRuler": {
+						"type": "boolean"
+					},
+					"showEmptyImages": {
+						"type": "boolean"
+					},
+					"showTableBorders": {
+						"type": "boolean"
+					},
+					"displayFormulaAsSymbol": {
+						"type": "boolean"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"subform": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["subform"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["object", "text", "number", "integer", "boolean", "picture", "date", "time", "undefined"]
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment":"When an object is focusable it is always tabable."
+					},
+					"hideFocusRing": {
+						"type": "boolean"
+					},
+					"scrollbarHorizontal": {
+						"enum": ["visible", "hidden"]
+					},
+					"scrollbarVertical": {
+						"enum": ["visible", "hidden"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"detailForm": {
+						"type": "string"
+					},
+					"listForm": {
+						"type": "string"
+					},
+					"table": {
+						"$ref": "#/definitions/types/table",
+						"$comment": "for list forms"
+					},
+					"selectionMode": {
+						"enum": ["multiple", "single", "none"],
+						"$comment": "for list forms"
+					},
+					"enterableInList": {
+						"type": "boolean",
+						"$comment": "for list forms"
+					},
+					"deletableInList": {
+						"type": "boolean",
+						"$comment": "for list forms"
+					},
+					"doubleClickInRowAction": {
+						"enum": ["editSubrecord", "displaySubrecord"],
+						"$comment": "for list forms"
+					},
+					"doubleClickInEmptyAreaAction": {
+						"enum": ["addSubrecord"],
+						"$comment": "for list forms"
+					},
+					"printFrame": {
+						"enum": ["fixedMultiple", "fixed", "variable"],
+						"$comment": "for list forms"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"plugin": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["plugin"]
+					},
+					"pluginAreaKind": {
+						"type": "string"
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer", "text", "object", "number", "boolean", "picture", "date", "time", "undefined"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment":"When an object is focusable it is always tabable."
+					},
+					"dragging": {
+						"enum": ["none", "automatic"]
+					},
+					"dropping": {
+						"enum": ["none", "automatic"]
+					},
+					"customProperties": {
+						"type": ["object","string"],
+						"$comment":"plugin specific properties, passed to plugin as a JSON string if an object, or as a binary buffer if a base64 encoded string."
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"splitter": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["splitter"]
+					},
+					"splitterMode": {
+						"enum": ["resize", "move"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment":"When memorizeGeometry is activated for the current form, memorizeValue save the value of the current object. "
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"buttonGrid": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["buttonGrid"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"action": {
+						"enum": ["gotoPage"]
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"rowCount": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"columnCount": {
+						"type": "integer",
+						"minimum": 1
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"progress": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "progress" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "integer", "number", "date", "time" ]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"continuousExecution": {
+						"type": "boolean"
+					},
+					"showGraduations": {
+						"type": "boolean"
+					},
+					"numberFormat": {
+						"type": "string"
+					},
+					"labelsPlacement": {
+						"enum": [ "none", "bottom", "top", "right", "left" ],
+						"$comment": "bottom is equivalent to right, top is equivalent to left. Actual placement depends on object orientation."
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"min": {
+						"type": "number"
+					},
+					"max": {
+						"type": "number",
+						"$comment": "if there's no 'max' property, the progress is indeterminate"
+					},
+					"step": {
+						"type": "number"
+					},
+					"graduationStep": {
+						"type": "number"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"ruler": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["ruler"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer", "number", "date", "time"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment":"When an object is focusable it is always tabable."
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"continuousExecution": {
+						"type": "boolean"
+					},
+					"showGraduations": {
+						"type": "boolean"
+					},
+					"numberFormat": {
+						"type": "string"
+					},
+					"labelsPlacement": {
+						"enum": ["none", "bottom", "top", "right", "left"],
+						"$comment": "bottom is equivalent to right, top is equivalent to left. Actual placement depends on object orientation."
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"min": {
+						"type": "number"
+					},
+					"max": {
+						"type": "number"
+					},
+					"step": {
+						"type": "number"
+					},
+					"graduationStep": {
+						"type": "number"
+					}
+				},
+				"required": ["max"]
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"spinner": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["spinner"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer", "number", "date", "time"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"stepper": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "stepper" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": [ "integer", "number", "date", "time" ]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"continuousExecution": {
+						"type": "boolean"
+					},
+					"min": {
+						"type": "number"
+					},
+					"max": {
+						"type": "number"
+					},
+					"step": {
+						"type": "number"
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"list": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["list"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"dataSourceTypeHint": {
+						"enum": ["integer"]
+					},
+					"method": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment":"When an object is focusable it is always tabable."
+					},
+					"hideFocusRing": {
+						"type": "boolean"
+					},
+					"enterable": {
+						"type": "boolean"
+					},
+					"selectionMode": {
+						"enum": ["single", "multiple"]
+					},
+					"entryFilter": {
+						"type": "string"
+					},
+					"list": {
+						"$ref": "#/definitions/types/list"
+					},
+					"scrollbarHorizontal": {
+						"enum": ["visible", "hidden", "automatic"]
+					},
+					"scrollbarVertical": {
+						"enum": ["visible", "hidden", "automatic"]
+					},
+					"dragging": {
+						"enum": ["none", "custom"]
+					},
+					"dropping": {
+						"enum": ["none", "custom"]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/drawingSpec"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}]
+		},
+		"pictureButton": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "pictureButton" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"picture": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"columnCount": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"rowCount": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"switchContinuously": {
+						"type": "boolean"
+					},
+					"loopBackToFirstFrame": {
+						"type": "boolean"
+					},
+					"switchWhenRollover": {
+						"type": "boolean"
+					},
+					"switchBackWhenReleased": {
+						"type": "boolean"
+					},
+					"useLastFrameAsDisabled": {
+						"type": "boolean"
+					},
+					"frameDelay": {
+						"type": "number",
+						"minimum": 0,
+						"$comment": "Unit is second"
+					},
+					"dropping": {
+						"enum": [ "none", "custom" ]
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/shortcut"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"picturePopup": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": ["picturePopup"]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string"
+					},
+					"tooltip": {
+						"type": "string"
+					},
+					"picture": {
+						"$ref": "#/definitions/types/picture"
+					},
+					"columnCount": {
+						"type": "integer",
+						"minimum": 1
+					},
+					"rowCount": {
+						"type": "integer",
+						"minimum": 1
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}]
+		},
+		"listbox": {
+			"allOf": [{
+				"properties": {
+					"type": {
+						"enum": [ "listbox" ]
+					},
+					"listboxType": {
+						"enum": [ "array", "currentSelection", "namedSelection", "collection" ]
+					},
+					"dataSource": {
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"dragging": {
+						"enum": [ "none", "custom" ]
+					},
+					"dropping": {
+						"enum": [ "none", "custom" ]
+					},
+					"hideFocusRing": {
+						"type": "boolean"
+					},
+					"hideSystemHighlight": {
+						"type": "boolean"
+					},
+					"hideExtraBlankRows": {
+						"type": "boolean"
+					},
+					"rowHeightSource": {
+						"type": "string",
+						"$comment": "array of row heights"
+					},
+					"selectionName": {
+						"type": "string",
+						"$comment": "The name of the selection to display. For namedSelection listboxType."
+					},
+					"currentItemSource": {
+						"type": "string"
+					},
+					"currentItemPositionSource": {
+						"type": "string"
+					},
+					"selectedItemsSource": {
+						"type": "string"
+					},
+					"metaSource": {
+						"type": "string"
+					},
+					"singleClickEdit": {
+						"type": "boolean"
+					},
+					"highlightSet": {
+						"type": "string",
+						"$comment": "A unique name for the set to contain highlighted records. Preferably a local set (with $ prefix). Mandatory when working on selection."
+					},
+					"doubleClickInRowAction": {
+						"enum": [ "editSubrecord", "displaySubrecord" ]
+					},
+					"detailForm": {
+						"type": "string"
+					},
+					"table": {
+						"$ref": "#/definitions/types/table"
+					},
+					"staticColumnCount": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"lockedColumnCount": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"selectionMode": {
+						"enum": [ "multiple", "none", "single" ]
+					},
+					"sortable": {
+						"type": "boolean"
+					},
+					"memorizeValue": {
+						"type": "boolean",
+						"$comment": "When memorizeGeometry is activated for the current form, memorizeValue save the state of column headers (sorted or not). "
+					},
+					"movableRows": {
+						"type": "boolean"
+					},
+					"action": {
+						"enum": [ "gotoPage" ]
+					},
+					"focusable": {
+						"type": "boolean",
+						"$comment": "When an object is focusable it is always tabable."
+					},
+					"rowHeight": {
+						"$ref": "#/definitions/types/height"
+					},
+					"scrollbarHorizontal": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"scrollbarVertical": {
+						"enum": [ "visible", "hidden", "automatic" ]
+					},
+					"showHeaders": {
+						"type": "boolean"
+					},
+					"showFooters": {
+						"type": "boolean"
+					},
+					"headerHeight": {
+						"$ref": "#/definitions/types/height"
+					},
+					"footerHeight": {
+						"$ref": "#/definitions/types/height"
+					},
+					"horizontalLineStroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"verticalLineStroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"stroke": {
+						"$ref": "#/definitions/types/color"
+					},
+					"fill": {
+						"$ref": "#/definitions/types/color"
+					},
+					"alternateFill": {
+						"$ref": "#/definitions/types/color"
+					},
+					"rowStrokeSource": {
+						"type": "string"
+					},
+					"rowFillSource": {
+						"type": "string"
+					},
+					"rowStyleSource": {
+						"type": "string"
+					},
+					"rowControlSource": {
+						"type": "string"
+					},
+					"textAlign": {
+						"enum": [ "automatic", "left", "center", "right" ]
+					},
+					"verticalAlign": {
+						"enum": [ "automatic", "top", "middle", "bottom" ]
+					},
+					"resizingMode": {
+						"enum": [ "rightToLeft", "legacy" ]
+					},
+					"rowHeightAutoMin": {
+						"$ref": "#/definitions/types/height",
+						"$comment": "used when all columns have property rowHeightAuto"
+					},
+					"rowHeightAutoMax": {
+						"$ref": "#/definitions/types/height",
+						"$comment": "used when all columns have property rowHeightAuto"
+					},
+					"horizontalPadding": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"verticalPadding": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"columns": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"allOf": [
+								{
+									"properties": {
+										"class": {
+											"type": "string"
+										},
+										"method": {
+											"type": "string"
+										},
+										"dataSourceTypeHint": {
+											"enum": [ "text", "number", "integer", "date", "time", "picture", "boolean", "object" ]
+										},
+										"dataSource": {
+											"anyOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												}
+											],
+											"$comment": "pass an array to get a hierarchical listbox"
+										},
+										"name": {
+											"type": "string"
+										},
+										"choiceList": {
+											"$ref": "#/definitions/types/list"
+										},
+										"saveAs": {
+											"enum": [ "value", "reference" ]
+										},
+										"automaticInsertion": {
+											"type": "boolean"
+										},
+										"width": {
+											"type": "integer",
+											"minimum": 0
+										},
+										"minWidth": {
+											"type": "integer",
+											"minimum": 0
+										},
+										"maxWidth": {
+											"type": "integer",
+											"minimum": 0
+										},
+										"resizable": {
+											"type": "boolean"
+										},
+										"enterable": {
+											"type": "boolean"
+										},
+										"entryFilter": {
+											"type": "string"
+										},
+										"contextMenu": {
+											"enum": [ "automatic", "none" ]
+										},
+										"requiredList": {
+											"$ref": "#/definitions/types/list"
+										},
+										"excludedList": {
+											"$ref": "#/definitions/types/list"
+										},
+										"values": {
+											"type": "array",
+											"items": {
+												"type": "string"
+											}
+										},
+										"textFormat": {
+											"type": "string"
+										},
+										"numberFormat": {
+											"type": "string"
+										},
+										"dateFormat": {
+											"$ref": "#/definitions/types/dateFormat"
+										},
+										"timeFormat": {
+											"$ref": "#/definitions/types/timeFormat"
+										},
+										"pictureFormat": {
+											"enum": [ "truncatedTopLeft", "truncatedCenter", "scaled", "background", "proportionalTopLeft", "proportionalCenter", "tiled" ]
+										},
+										"booleanFormat": {
+											"type": "string",
+											"$comment": "textWhenTrue;textWhenFalse"
+										},
+										"visibility": {
+											"enum": [ "visible", "hidden" ]
+										},
+										"controlType": {
+											"enum": [ "automatic", "checkbox", "popup", "input" ]
+										},
+										"controlTitle": {
+											"type": "string"
+										},
+										"wordwrap": {
+											"enum": [ "none", "normal" ]
+										},
+										"truncateMode": {
+											"enum": [ "withEllipsis", "none" ]
+										},
+										"stroke": {
+											"$ref": "#/definitions/types/color"
+										},
+										"fill": {
+											"$ref": "#/definitions/types/color"
+										},
+										"alternateFill": {
+											"$ref": "#/definitions/types/color"
+										},
+										"styledText": {
+											"type": "boolean"
+										},
+										"rowStrokeSource": {
+											"type": "string"
+										},
+										"rowFillSource": {
+											"type": "string"
+										},
+										"rowStyleSource": {
+											"type": "string"
+										},
+										"textAlign": {
+											"enum": [ "automatic", "left", "center", "right" ]
+										},
+										"verticalAlign": {
+											"enum": [ "automatic", "top", "middle", "bottom" ]
+										},
+										"rowHeightAuto": {
+											"type": "boolean"
+										},
+										"horizontalPadding": {
+											"type": "integer",
+											"minimum": 0
+										},
+										"verticalPadding": {
+											"type": "integer",
+											"minimum": 0
+										},
+										"header": {
+											"type": "object",
+											"allOf": [
+												{
+													"properties": {
+														"class": {
+															"type": "string"
+														},
+														"text": {
+															"type": "string"
+														},
+														"name": {
+															"type": "string"
+														},
+														"dataSource": {
+															"type": "string"
+														},
+														"tooltip": {
+															"type": "string"
+														},
+														"icon": {
+															"$ref": "#/definitions/types/picture"
+														},
+														"iconPlacement": {
+															"enum": [ "none", "left", "right" ]
+														},
+														"textAlign": {
+															"enum": [ "automatic", "left", "center", "right" ]
+														},
+														"verticalAlign": {
+															"enum": [ "automatic", "top", "middle", "bottom" ]
+														},
+														"stroke": {
+															"$ref": "#/definitions/types/color"
+														},
+														"horizontalPadding": {
+															"type": "integer",
+															"minimum": 0
+														},
+														"verticalPadding": {
+															"type": "integer",
+															"minimum": 0
+														}
+													}
+												},
+												{
+													"$ref": "#/definitions/types/fontSpec"
+												}
+											]
+										},
+
+										"footer": {
+											"type": "object",
+											"allOf": [
+												{
+													"properties": {
+														"class": {
+															"type": "string"
+														},
+														"name": {
+															"type": "string"
+														},
+														"tooltip": {
+															"type": "string"
+														},
+														"dataSource": {
+															"type": "string"
+														},
+														"dataSourceTypeHint": {
+															"enum": [ "text", "number", "integer", "date", "time", "picture", "object" ]
+														},
+														"variableCalculation": {
+															"enum": [ "none", "minimum", "maximum", "sum", "count", "average", "standardDeviation", "variance", "sumSquares" ]
+														},
+														"stroke": {
+															"$ref": "#/definitions/types/color"
+														},
+														"fill": {
+															"$ref": "#/definitions/types/color"
+														},
+														"textFormat": {
+															"type": "string"
+														},
+														"numberFormat": {
+															"type": "string"
+														},
+														"dateFormat": {
+															"$ref": "#/definitions/types/dateFormat"
+														},
+														"timeFormat": {
+															"$ref": "#/definitions/types/timeFormat"
+														},
+														"pictureFormat": {
+															"enum": [ "truncatedCenter", "scaled", "background", "truncatedTopLeft", "proportionalTopLeft", "proportionalCenter", "tiled" ]
+														},
+														"wordwrap": {
+															"enum": [ "automatic", "normal", "none" ]
+														},
+														"truncateMode": {
+															"enum": [ "withEllipsis", "none" ]
+														},
+														"textAlign": {
+															"enum": [ "automatic", "left", "center", "right" ]
+														},
+														"verticalAlign": {
+															"enum": [ "automatic", "top", "middle", "bottom" ]
+														},
+														"horizontalPadding": {
+															"type": "integer",
+															"minimum": 0
+														},
+														"verticalPadding": {
+															"type": "integer",
+															"minimum": 0
+														}
+													}
+												},
+												{
+													"$ref": "#/definitions/types/fontSpec"
+												}
+											]
+										}
+									}
+								},
+								{
+									"$ref": "#/definitions/types/fontSpec"
+								},
+								{
+									"$ref": "#/definitions/types/events"
+								}
+							]
+						}
+					}
+				}
+			}, {
+				"$ref": "#/definitions/types/objectCommon"
+			}, {
+				"$ref": "#/definitions/types/events"
+			}, {
+				"$ref": "#/definitions/types/borderStyle"
+			}, {
+				"$ref": "#/definitions/types/fontSpec"
+			}
+
+			]
+		}
+	},
+	"allOf": [{
+		"$ref": "#/definitions/types/windowSize"
+	}, {
+		"$ref": "#/definitions/types/formSize"
+	}, {
+		"$ref": "#/definitions/types/markers"
+	}, {
+		"$ref": "#/definitions/types/events"
+	}, {
+		"properties": {
+			"$4d": {
+				"type": "object",
+				"$comment": "Metadata for 4D JSON objects. Reserved.",
+				"properties": {
+					"version": {
+						"type": "string"
+					},
+					"kind": {
+						"enum": [ "form" ]
+					}
+				},
+				"required": [ "version", "kind" ]
+			},
+			"name": {
+				"type": "string"
+			},
+			"windowTitle": {
+				"type": "string"
+			},
+			"memorizeGeometry": {
+				"type": "boolean",
+				"$comment": "The name property is used to uniquely identify this form when loading its geometry from preferences"
+			},
+			"method": {
+				"type": "string"
+			},
+			"inheritedForm": {
+				"type": "string"
+			},
+			"inheritedFormTable": {
+				"$ref": "#/definitions/types/table"
+			},
+			"menuBar": {
+				"type": "string",
+				"$comment": "Name of optional associated menu bar."
+			},
+			"shared": {
+				"type": "boolean",
+				"$comment": "This form is seen by host database and components"
+			},
+			"destination": {
+				"enum": [ "detailScreen", "listScreen", "detailPrinter", "listPrinter" ]
+			},
+			"pageFormat": {
+				"$ref": "#/definitions/types/pageFormat"
+			},
+			"css": {
+				"anyOf": [
+					{
+						"$ref": "#/definitions/types/css"
+					},
+					{
+						"type": "array",
+						"items": {
+							"$ref": "#/definitions/types/css"
+						}
+					}
+				]
+			},
+			"colorScheme": {
+				"enum": [ "light", "dark" ]
+			},
+			"fluentUI": {
+				"type": "boolean",
+				"$comment": "This form will use FluentUI widget"
+			},
+			"formClass": {
+				"type": "string",
+				"$comment": "Class to type the object returned by Form"
+			},
+			"geometryStamp": {
+				"type": "number"
+			},
+			"pages": {
+				"type": "array",
+				"items": {
+					"type": [ "object", "null" ],
+					"properties": {
+						"objects": {
+							"$comment": "This attribute name define the form object name property",
+							"type": "object",
+							"additionalProperties": {
+								"oneOf": [
+									{
+										"$ref": "#/definitions/text"
+									},
+									{
+										"$ref": "#/definitions/input"
+									},
+									{
+										"$ref": "#/definitions/button"
+									},
+									{
+										"$ref": "#/definitions/checkbox"
+									},
+									{
+										"$ref": "#/definitions/radio"
+									},
+									{
+										"$ref": "#/definitions/dropdown"
+									},
+									{
+										"$ref": "#/definitions/combo"
+									},
+									{
+										"$ref": "#/definitions/groupBox"
+									},
+									{
+										"$ref": "#/definitions/tab"
+									},
+									{
+										"$ref": "#/definitions/line"
+									},
+									{
+										"$ref": "#/definitions/rectangle"
+									},
+									{
+										"$ref": "#/definitions/oval"
+									},
+									{
+										"$ref": "#/definitions/picture"
+									},
+									{
+										"$ref": "#/definitions/write"
+									},
+									{
+										"$ref": "#/definitions/view"
+									},
+									{
+										"$ref": "#/definitions/webArea"
+									},
+									{
+										"$ref": "#/definitions/subform"
+									},
+									{
+										"$ref": "#/definitions/listbox"
+									},
+									{
+										"$ref": "#/definitions/plugin"
+									},
+									{
+										"$ref": "#/definitions/splitter"
+									},
+									{
+										"$ref": "#/definitions/progress"
+									},
+									{
+										"$ref": "#/definitions/ruler"
+									},
+									{
+										"$ref": "#/definitions/spinner"
+									},
+									{
+										"$ref": "#/definitions/stepper"
+									},
+									{
+										"$ref": "#/definitions/list"
+									},
+									{
+										"$ref": "#/definitions/buttonGrid"
+									},
+									{
+										"$ref": "#/definitions/pictureButton"
+									},
+									{
+										"$ref": "#/definitions/picturePopup"
+									}
+								],
+								"required": [ "type" ]
+							}
+						},
+						"entryOrder": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"required": [ "objects" ]
+				}
+			}
+		}
+	}]
+}
