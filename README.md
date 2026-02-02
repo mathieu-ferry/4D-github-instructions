@@ -2,6 +2,8 @@
 
 A collection of GitHub Copilot custom instructions designed to enhance 4D application development. These instruction files help GitHub Copilot understand 4D-specific syntax, conventions, and best practices, resulting in better code suggestions and assistance.
 
+Credits: 4d.instructions.md & 4d.test.instructions.md initialized & inspired by https://github.com/e-marchand/instructions
+
 ## 📋 What's Included
 
 | File | Purpose |
@@ -10,7 +12,7 @@ A collection of GitHub Copilot custom instructions designed to enhance 4D applic
 | `4d.forms.instructions.md` | 4D Forms architecture: form-class binding, event handling, and UI patterns |
 | `4d.errors.instructions.md` | Error handling guidance and common issues with the 4D syntax checker |
 | `4d.catalog.instructions.md` | Guide for editing `catalog.4DCatalog` XML files (database structure) |
-| `4dtest.md.instructions.md` | Instructions for running 4D tests with tool4d |
+| `4d.test.instructions.md` | Instructions for running 4D tests with tool4d |
 | `formsSchema.json` | JSON schema for 4D form validation |
 
 ## 🚀 Installation
